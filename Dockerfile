@@ -18,7 +18,19 @@ RUN addgroup -g 101 -S nginx \
     && curl -f -L -O https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_VERSION}/openssl-${OPENSSL_VERSION}.tar.gz \
     && tar -xvzf openssl-${OPENSSL_VERSION}.tar.gz \
     && cd openssl-${OPENSSL_VERSION} \
-    && ./Configure --prefix=/usr --libdir=lib shared zlib \
+    && ARCH=$(uname -m) \
+    && case "$ARCH" in \
+           i386|i686) \
+               ./Configure linux-elf --prefix=/usr --libdir=lib shared zlib ;; \
+           x86_64) \
+               ./Configure linux-x86_64 --prefix=/usr --libdir=lib shared zlib ;; \
+           arm*) \
+               ./Configure linux-armv4 --prefix=/usr --libdir=lib shared zlib ;; \
+           aarch64) \
+               ./Configure linux-aarch64 --prefix=/usr --libdir=lib shared zlib ;; \
+           *) \
+               ./Configure --prefix=/usr --libdir=lib shared zlib ;; \
+       esac \
     && make -j$(nproc) \
     && make install \
     && cd .. \
