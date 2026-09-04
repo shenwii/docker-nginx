@@ -33,6 +33,9 @@ RUN addgroup -g 101 -S nginx \
     && rm -rf nginx-${NGINX_VERSION} nginx-${NGINX_VERSION}.tar.gz \
     && mkdir /docker-entrypoint.d \
     && mkdir /etc/nginx/conf.d \
+    && mkdir -p /var/log/nginx \
+    && mkdir -p /var/cache/nginx/ \
+    && touch /run/nginx.pid \
     && apk del --no-network .build-deps \
     && ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log \
