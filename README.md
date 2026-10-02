@@ -19,11 +19,11 @@ This image intentionally does not define any default `server` block.
 
 That means:
 
-- it does not listen on port 80 by default
-- `conf.d/*.conf` is not included automatically
-- users are expected to provide their own nginx config files if they want a running service
+- it does not listen on port 80 unless the user adds a config
+- the main nginx config still keeps `include /etc/nginx/conf.d/*.conf;`
+- users are expected to place their own nginx config files in `/etc/nginx/conf.d` to define services
 
-This is by design. The image is meant to be a reusable nginx binary + module environment, not a preconfigured web server with a dummy default site.
+This is by design. The image is meant to be a reusable nginx binary + module environment, not a preconfigured web server with a dummy default site. The standard `conf.d` hook remains available so the end user can drop in their own site configuration files.
 
 ## Why this image
 
