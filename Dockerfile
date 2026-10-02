@@ -67,7 +67,7 @@ RUN addgroup -g 101 -S nginx \
     && adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx \
     && apk add --no-cache libaio zlib pcre2 gettext-envsubst luajit libstdc++ \
     && mkdir /docker-entrypoint.d \
-    && mkdir /etc/nginx/conf.d \
+    && mkdir -p /etc/nginx/conf.d \
     && mkdir -p /var/log/nginx \
     && mkdir -p /var/cache/nginx/ \
     && mkdir -p /etc/nginx/templates \
