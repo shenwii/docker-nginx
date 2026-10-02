@@ -24,19 +24,17 @@ RUN addgroup -g 101 -S nginx \
     && curl -f -L -O https://github.com/owasp-modsecurity/ModSecurity/releases/download/${MODSECURITY_VERSION}/modsecurity-${MODSECURITY_VERSION}.tar.gz \
     && tar -xvzf modsecurity-${MODSECURITY_VERSION}.tar.gz \
     && cd modsecurity-${MODSECURITY_VERSION} \
-    && ./configure --prefix=/usr \
+    && ./configure --prefix=/usr/local --enable-shared \
     && make -j$(nproc) \
-    && make install \
+    && make install-strip \
     && cd /root/ \
-    && rm -rf modsecurity-${MODSECURITY_VERSION} modsecurity-${MODSECURITY_VERSION}.tar.gz \
     && curl -f -L -O https://github.com/openssl/openssl/releases/download/openssl-${OPENSSL_VERSION}/openssl-${OPENSSL_VERSION}.tar.gz \
     && tar -xvzf openssl-${OPENSSL_VERSION}.tar.gz \
     && cd openssl-${OPENSSL_VERSION} \
-    && ./Configure --prefix=/usr --libdir=lib shared zlib \
+    && ./Configure --prefix=/usr/local --libdir=lib shared zlib \
     && make -j$(nproc) \
     && make install_sw \
     && cd /root/ \
-    && rm -rf openssl-${OPENSSL_VERSION} openssl-${OPENSSL_VERSION}.tar.gz \
     && git clone --depth 1 'https://github.com/openresty/lua-nginx-module' \
     && git clone --depth 1 'https://github.com/vision5/ngx_devel_kit' \
     && git clone --depth 1 'https://github.com/owasp-modsecurity/ModSecurity-nginx' \
@@ -47,19 +45,15 @@ RUN addgroup -g 101 -S nginx \
     && make -j$(nproc) \
     && make install \
     && cd /root/ \
-    && rm -rf nginx-${NGINX_VERSION} nginx-${NGINX_VERSION}.tar.gz ngx_devel_kit lua-nginx-module ModSecurity-nginx \
     && git clone --depth 1 'https://github.com/openresty/lua-resty-core' \
     && cd lua-resty-core \
     && make install LUA_LIB_DIR=/etc/nginx/lualib \
     && cd /root/ \
-    && rm -rf lua-resty-core \
     && git clone --depth 1 'https://github.com/openresty/lua-resty-lrucache' \
     && cd lua-resty-lrucache \
     && make install LUA_LIB_DIR=/etc/nginx/lualib \
     && cd /root/ \
-    && rm -rf lua-resty-lrucache \
-    && find /usr/lib -type f \( -name '*.a' -o -name '*.la' \) -delete \
-    && rm -rf /usr/include /usr/share/doc /usr/share/man
+    && find /usr/local/lib -type f \( -name '*.a' -o -name '*.la' \) -delete
 
 FROM cgr.dev/chainguard/wolfi-base
 
@@ -78,8 +72,8 @@ RUN addgroup -g 101 -S nginx \
 
 COPY --from=builder /usr/sbin/nginx /usr/sbin/nginx
 COPY --from=builder /etc/nginx /etc/nginx
-COPY --from=builder /usr/lib /usr/lib
-COPY --from=builder /usr/bin/openssl /usr/bin/openssl
+COPY --from=builder /usr/local/lib /usr/lib
+COPY --from=builder /usr/local/bin/openssl /usr/bin/openssl
 
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY docker-entrypoint.sh /
