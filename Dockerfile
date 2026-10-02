@@ -18,13 +18,17 @@ RUN addgroup -g 101 -S nginx \
         pcre2-dev \
         perl \
         zlib-dev \
+        libxml2-dev \
+        yajl-dev \
+        lmdb-dev \
+        libmaxminddb-dev \
     && export LUAJIT_LIB=$(pkg-config --variable=libdir luajit) \
     && export LUAJIT_INC=$(pkg-config --variable=includedir luajit) \
     && cd /root/ \
     && curl -f -L -O https://github.com/owasp-modsecurity/ModSecurity/releases/download/${MODSECURITY_VERSION}/modsecurity-${MODSECURITY_VERSION}.tar.gz \
     && tar -xvzf modsecurity-${MODSECURITY_VERSION}.tar.gz \
     && cd modsecurity-${MODSECURITY_VERSION} \
-    && ./configure --prefix=/usr/local --enable-shared \
+    && ./configure --prefix=/usr/local --enable-shared --with-lmdb \
     && make -j$(nproc) \
     && make install-strip \
     && cd /root/ \
@@ -59,7 +63,7 @@ FROM cgr.dev/chainguard/wolfi-base
 
 RUN addgroup -g 101 -S nginx \
     && adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx \
-    && apk add --no-cache libaio zlib pcre2 gettext-envsubst luajit libstdc++ \
+    && apk add --no-cache libaio zlib pcre2 gettext-envsubst luajit libstdc++ libxml2 yajl lmdb libmaxminddb \
     && mkdir /docker-entrypoint.d \
     && mkdir -p /etc/nginx/conf.d \
     && mkdir -p /var/log/nginx \
