@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-
 FROM cgr.dev/chainguard/wolfi-base AS builder
 
 ENV NGINX_VERSION=1.31.6
@@ -63,7 +61,7 @@ FROM cgr.dev/chainguard/wolfi-base
 
 RUN addgroup -g 101 -S nginx \
     && adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx \
-    && apk add --no-cache libaio zlib pcre2 gettext-envsubst luajit libstdc++ libxml2-16 yajl lmdb libmaxminddb \
+    && apk add --no-cache libaio zlib pcre2 gettext-envsubst luajit libstdc++ libxml2-16 yajl lmdb libmaxminddb lua-cjson \
     && mkdir /docker-entrypoint.d \
     && mkdir -p /etc/nginx/conf.d \
     && mkdir -p /var/log/nginx \
