@@ -1,7 +1,7 @@
 FROM cgr.dev/chainguard/wolfi-base AS builder
 
-ENV NGINX_VERSION=1.31.6
-ENV OPENSSL_VERSION=4.0.2
+ENV NGINX_VERSION=1.31.7
+ENV OPENSSL_VERSION=4.0.3
 ENV MODSECURITY_VERSION=v3.0.17
 
 RUN addgroup -g 101 -S nginx \
@@ -76,6 +76,8 @@ COPY --from=builder /usr/sbin/nginx /usr/sbin/nginx
 COPY --from=builder /etc/nginx /etc/nginx
 COPY --from=builder /usr/local/lib /usr/lib
 COPY --from=builder /usr/local/bin/openssl /usr/bin/openssl
+
+WORKDIR /etc/nginx
 
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY docker-entrypoint.sh /
