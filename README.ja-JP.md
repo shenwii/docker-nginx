@@ -54,8 +54,15 @@
 - LuaJIT
 - `ngx_devel_kit`
 - `lua-nginx-module`
+ - `stream-lua-nginx-module`
 - `lua-resty-core`
 - `lua-resty-lrucache`
+
+## 実行時の環境変数
+
+- `NGINX_USER`: 生成される `nginx.conf` の `user` 指定（デフォルト: `nginx`）。イメージ内に該当ユーザーが存在する必要があります。
+- `LOAD_MODULES`: カンマ区切りで指定する `.so` モジュールの絶対パス（例: `/usr/lib/nginx/modules/ngx_http_foo.so,/usr/lib/nginx/modules/ngx_stream_bar.so`）。ビルド済みモジュールは `/usr/lib/nginx/modules` に配置されています。
+- `USE_STREAM`: `1` を指定すると `stream { include /etc/nginx/stream-conf.d/*.conf; }` をランタイムの `nginx.conf` に追記します（デフォルト: `0`）。
 
 ## イメージの構造
 

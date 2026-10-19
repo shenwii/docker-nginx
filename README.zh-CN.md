@@ -55,8 +55,15 @@
 - LuaJIT
 - `ngx_devel_kit`
 - `lua-nginx-module`
+ - `stream-lua-nginx-module`
 - `lua-resty-core`
 - `lua-resty-lrucache`
+
+## 运行时环境变量
+
+- `NGINX_USER`：写入生成的 `nginx.conf` 中的 `user` 指令（默认：`nginx`）。所指定的用户必须在镜像中存在，否则 nginx 无法切换到该用户。
+- `LOAD_MODULES`：以逗号分隔的模块绝对路径列表，用于在容器启动时 `load_module`（例如 `/usr/lib/nginx/modules/ngx_http_foo.so,/usr/lib/nginx/modules/ngx_stream_bar.so`）。镜像在 `/usr/lib/nginx/modules` 中包含了构建好的模块。
+- `USE_STREAM`：设置为 `1` 时会在运行时的 `nginx.conf` 末尾追加 `stream { include /etc/nginx/stream-conf.d/*.conf; }`（默认：`0`）。
 
 ## 镜像目录结构
 

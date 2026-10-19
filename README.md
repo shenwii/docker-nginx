@@ -55,8 +55,15 @@ The main customization points are:
 - LuaJIT
 - `ngx_devel_kit`
 - `lua-nginx-module`
+ - `stream-lua-nginx-module`
 - `lua-resty-core`
 - `lua-resty-lrucache`
+
+## Runtime environment variables
+
+- `NGINX_USER`: the `user` directive written into the generated `nginx.conf` (default: `nginx`). The named user must exist in the image or nginx will not be able to switch to it.
+- `LOAD_MODULES`: comma-separated list of absolute module paths to `load_module` at container startup (e.g. `/usr/lib/nginx/modules/ngx_http_foo.so,/usr/lib/nginx/modules/ngx_stream_bar.so`). The image contains the built modules under `/usr/lib/nginx/modules`.
+- `USE_STREAM`: set to `1` to append a `stream { include /etc/nginx/stream-conf.d/*.conf; }` block into the runtime `nginx.conf` (default: `0`).
 
 ## Image layout
 
