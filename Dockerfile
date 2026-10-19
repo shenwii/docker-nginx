@@ -80,7 +80,6 @@ RUN addgroup -g 101 -S nginx \
 COPY --from=builder /usr/sbin/nginx /usr/sbin/nginx
 COPY --from=builder /etc/nginx /etc/nginx
 COPY --from=builder /usr/local/lib /usr/lib
-COPY --from=builder /usr/lib/nginx/modules /usr/lib/nginx/modules
 COPY --from=builder /usr/local/bin/openssl /usr/bin/openssl
 
 WORKDIR /etc/nginx
