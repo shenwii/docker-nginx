@@ -1,5 +1,10 @@
 #!/bin/sh
 
+if [ -f /etc/nginx/nginx.conf ]; then
+    echo "nginx.conf already exists, skipping generation."
+    exit 0
+fi
+
 envsubst '$NGINX_USER' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
 
 if [ -n "$LOAD_MODULES" ]; then
