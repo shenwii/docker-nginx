@@ -65,11 +65,17 @@ ENV LOAD_MODULES=
 ENV USE_STREAM=0
 ENV LUAROCKS_PACKAGES=
 
+COPY --from=builder /usr/sbin/nginx /usr/sbin/nginx
+COPY --from=builder /etc/nginx /etc/nginx
+COPY --from=builder /usr/local/lib /usr/lib
+COPY --from=builder /usr/local/bin/openssl /usr/bin/openssl
+
 RUN addgroup -g 101 -S nginx \
     && adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx \
     && apk add --no-cache libaio zlib pcre2 gettext-envsubst luajit libstdc++ libxml2-16 yajl lmdb libmaxminddb lua-cjson wget \
     && mkdir /docker-entrypoint.d \
     && mkdir -p /etc/nginx/conf.d \
+    && mkdir -p /etc/nginx/stream-conf.d \
     && mkdir -p /var/log/nginx \
     && mkdir -p /var/cache/nginx/ \
     && mkdir -p /etc/nginx/templates \
@@ -77,11 +83,6 @@ RUN addgroup -g 101 -S nginx \
     && ln -sf /dev/stdout /var/log/nginx/access.log \
     && ln -sf /dev/stderr /var/log/nginx/error.log \
     && rm -f /etc/nginx/nginx.conf
-
-COPY --from=builder /usr/sbin/nginx /usr/sbin/nginx
-COPY --from=builder /etc/nginx /etc/nginx
-COPY --from=builder /usr/local/lib /usr/lib
-COPY --from=builder /usr/local/bin/openssl /usr/bin/openssl
 
 WORKDIR /etc/nginx
 
