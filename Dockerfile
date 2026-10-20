@@ -4,10 +4,6 @@ ENV NGINX_VERSION=1.31.7
 ENV OPENSSL_VERSION=4.0.3
 ENV MODSECURITY_VERSION=v3.0.17
 
-ENV NGINX_USER=nginx
-ENV LOAD_MODULES=
-ENV USE_STREAM=0
-
 RUN addgroup -g 101 -S nginx \
     && adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx \
     && apk add --no-cache --virtual .build-deps \
@@ -64,6 +60,11 @@ RUN addgroup -g 101 -S nginx \
 
 FROM cgr.dev/chainguard/wolfi-base
 
+ENV NGINX_USER=nginx
+ENV LOAD_MODULES=
+ENV USE_STREAM=0
+ENV LUAROCKS_PACKAGES=
+
 RUN addgroup -g 101 -S nginx \
     && adduser -S -D -H -u 101 -h /var/cache/nginx -s /sbin/nologin -G nginx -g nginx nginx \
     && apk add --no-cache libaio zlib pcre2 gettext-envsubst luajit libstdc++ libxml2-16 yajl lmdb libmaxminddb lua-cjson wget \
@@ -88,7 +89,8 @@ COPY nginx.conf.template /etc/nginx/nginx.conf.template
 COPY docker-entrypoint.sh /
 COPY 15-local-resolvers.envsh /docker-entrypoint.d
 COPY 20-envsubst-on-templates.sh /docker-entrypoint.d
-COPY 25-generate-nginx-conf.sh /docker-entrypoint.d
+COPY 25-luarocks-packages.sh /docker-entrypoint.d
+COPY 50-generate-nginx-conf.sh /docker-entrypoint.d
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
 EXPOSE 80

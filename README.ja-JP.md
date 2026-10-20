@@ -6,7 +6,7 @@
 
 ## 特徴
 
-- ソースコードからビルドした OpenSSL 4.0.2
+- ソースコードからビルドした OpenSSL 4.0.3
 - OpenSSL 4.0+ による ECH サポート
 - LuaJIT と `lua-nginx-module` を統合
 - ModSecurity v3 と `ModSecurity-nginx` を統合
@@ -38,6 +38,7 @@
 2. LuaJIT 統合
    - `lua-nginx-module` を含む。
    - `lua-resty-core` と `lua-resty-lrucache` は `/etc/nginx/lualib` にインストールされる。
+   - `LUAROCKS_PACKAGES` を使えば、起動時に追加の LuaRocks 依存を導入できる。
 
 3. ModSecurity 統合
    - ModSecurity を nginx に組み込み、WAF やリクエスト検査用途に利用できる。
@@ -48,8 +49,8 @@
 
 ## 含まれるコンポーネント
 
-- nginx 1.31.6
-- OpenSSL 4.0.2
+- nginx 1.31.7
+- OpenSSL 4.0.3
 - ModSecurity v3.0.17
 - LuaJIT
 - `ngx_devel_kit`
@@ -63,6 +64,7 @@
 - `NGINX_USER`: 生成される `nginx.conf` の `user` 指定（デフォルト: `nginx`）。イメージ内に該当ユーザーが存在する必要があります。
 - `LOAD_MODULES`: カンマ区切りで指定する `.so` モジュールの絶対パス（例: `/usr/lib/nginx/modules/ngx_http_foo.so,/usr/lib/nginx/modules/ngx_stream_bar.so`）。ビルド済みモジュールは `/usr/lib/nginx/modules` に配置されています。
 - `USE_STREAM`: `1` を指定すると `stream { include /etc/nginx/stream-conf.d/*.conf; }` をランタイムの `nginx.conf` に追記します（デフォルト: `0`）。
+- `LUAROCKS_PACKAGES`: カンマ区切りの LuaRocks パッケージ一覧を指定し、初回起動時に自動インストールする（例: `lua-resty-http,luasocket`）。インストールは初回のみ実行され、初期化マーカーで保護されるため、マーカーを削除しない限り再起動時に再インストールされません。イメージを再ビルドせずに追加の Lua 依存を入れたいときに便利です。
 
 ## イメージの構造
 
@@ -83,12 +85,14 @@
 - `docker-entrypoint.sh`
 - `15-local-resolvers.envsh`
 - `20-envsubst-on-templates.sh`
+- `25-luarocks-packages.sh`
 
 これらは一般的な nginx Docker の流儀に従っており：
 
 - 起動前に `/docker-entrypoint.d` 中のスクリプトを実行
 - 必要に応じて `.envsh` を読み込み
 - テンプレートファイルに環境変数を展開
+- `LUAROCKS_PACKAGES` が設定されていれば、初回起動時に LuaRocks をインストール
 
 という動作を行います。
 
@@ -138,12 +142,13 @@ server {
 }
 ```
 
-## 備考
+## 追加メモ
 
-- このイメージは「事前に用意されたデモサイト」ではなく、汎用的な nginx コンパイル環境を意図しています。
-- Dockerfile はビルド用ツールチェーンを builder ステージに置き、実行時に必要なものだけを最終段へコピーします。
-- OpenSSL は `make install_sw` を使っており、これは最小限の実行時インストールとして妥当です。
-- 最終イメージでは、ビルド時のヘッダや不要な成果物を削除してサイズを抑えています。
+- このイメージは、予め設定済みのデモサイトよりも柔軟性と実験性を重視しています。
+- Dockerfile は構築用ツールチェーンを builder ステージに残し、実行時に必要な成果物だけを最終イメージにコピーします。
+- OpenSSL には `make install_sw` を使っています。これは最小限のランタイム向けインストールとして妥当です。
+- `LUAROCKS_PACKAGES` はビルド時依存ではなく起動時の便利機能です。初回起動時のみ導入され、以後は初期化マーカーで抑止されます。
+- 最終イメージでは、ビルド時だけ必要なヘッダや未使用ファイルを削除してサイズを抑えています。
 
 ## ライセンス
 

@@ -20,7 +20,7 @@ http {
 
     access_log  /var/log/nginx/access.log  main;
     
-    lua_package_path "/etc/nginx/lualib/?.lua";
+    lua_package_path "/etc/nginx/lualib/?.lua;/usr/share/lua/5.1/?.lua;/usr/share/lua/5.1/?/init.lua";
 
     sendfile        on;
     #tcp_nopush     on;

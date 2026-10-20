@@ -6,7 +6,7 @@
 
 ## 特点
 
-- 基于源码编译 OpenSSL 4.0.2
+- 基于源码编译 OpenSSL 4.0.3
 - 通过 OpenSSL 4.0+ 开启 ECH 支持
 - 集成 LuaJIT 和 `lua-nginx-module`
 - 集成 ModSecurity v3 和 `ModSecurity-nginx`
@@ -38,6 +38,7 @@
 2. LuaJIT 集成
    - 包含 `lua-nginx-module`。
    - `lua-resty-core` 和 `lua-resty-lrucache` 会安装到 `/etc/nginx/lualib`。
+   - 也可以通过 `LUAROCKS_PACKAGES` 在启动时额外安装 LuaRocks 依赖。
 
 3. ModSecurity 集成
    - ModSecurity 会被编译并接入 nginx。
@@ -49,8 +50,8 @@
 
 ## 包含的组件
 
-- nginx 1.31.6
-- OpenSSL 4.0.2
+- nginx 1.31.7
+- OpenSSL 4.0.3
 - ModSecurity v3.0.17
 - LuaJIT
 - `ngx_devel_kit`
@@ -64,6 +65,7 @@
 - `NGINX_USER`：写入生成的 `nginx.conf` 中的 `user` 指令（默认：`nginx`）。所指定的用户必须在镜像中存在，否则 nginx 无法切换到该用户。
 - `LOAD_MODULES`：以逗号分隔的模块绝对路径列表，用于在容器启动时 `load_module`（例如 `/usr/lib/nginx/modules/ngx_http_foo.so,/usr/lib/nginx/modules/ngx_stream_bar.so`）。镜像在 `/usr/lib/nginx/modules` 中包含了构建好的模块。
 - `USE_STREAM`：设置为 `1` 时会在运行时的 `nginx.conf` 末尾追加 `stream { include /etc/nginx/stream-conf.d/*.conf; }`（默认：`0`）。
+- `LUAROCKS_PACKAGES`：逗号分隔的 LuaRocks 包列表，在首次启动时自动安装，例如 `lua-resty-http,luasocket`。安装逻辑只会执行一次，并使用初始化标记进行保护，因此除非删除初始化标记，否则重启不会重复安装。这适合在不重建镜像的情况下增加额外 Lua 依赖。
 
 ## 镜像目录结构
 
@@ -84,12 +86,14 @@
 - `docker-entrypoint.sh`
 - `15-local-resolvers.envsh`
 - `20-envsubst-on-templates.sh`
+- `25-luarocks-packages.sh`
 
 这些脚本遵循常见的 nginx Docker 方式：
 
 - 在启动前执行 `/docker-entrypoint.d` 下的脚本
 - 根据需要加载 `.envsh` 环境变量
 - 对模板文件执行环境变量替换
+- 当设置了 `LUAROCKS_PACKAGES` 时，在首次启动时安装这些 LuaRocks 依赖
 
 这种设计意在兼容官方 nginx 容器的用法，但最终真正的服务配置由使用者自行提供。
 
@@ -139,11 +143,12 @@ server {
 
 ## 备注
 
-- 这个镜像更偏“通用 nginx 编译环境”，而非预装好的 demo 站点。
-- Dockerfile 将编译工具链放在 builder 阶段，最终阶段只保留运行时所需文件。
-- OpenSSL 使用 `make install_sw`，这是最合理的最小运行时安装方式。
-- 最终镜像会移除编译头文件及其他非运行时内容，以减小体积。
+- 这个镜像主要面向灵活性和实验性使用，而不是预先配置好的示例站点。
+- Dockerfile 会把构建工具链保留在 builder 阶段，只将运行时产物复制到最终镜像。
+- `make install_sw` 用于 OpenSSL，因为这是最合适的最小运行时安装方式。
+- `LUAROCKS_PACKAGES` 是一个启动阶段的便利钩子，而不是编译时依赖；它会在首次启动时安装一次并被标记保护，后续默认跳过。
+- 最终镜像会移除构建阶段的头文件和无用产物，以减少镜像体积。
 
 ## 许可证
 
-详情见 `LICENSE`。
+有关项目许可证，请参见 `LICENSE`。

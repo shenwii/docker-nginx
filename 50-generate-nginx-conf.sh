@@ -21,6 +21,8 @@ fi
 if [ "$USE_STREAM" = "1" ]; then
     cat >> /etc/nginx/nginx.conf << EOF
 stream {
+    lua_package_path "/etc/nginx/lualib/?.lua;/usr/share/lua/5.1/?.lua;/usr/share/lua/5.1/?/init.lua";
+
     include /etc/nginx/stream-conf.d/*.conf;
 }
 EOF

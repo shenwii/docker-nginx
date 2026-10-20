@@ -6,7 +6,7 @@ A custom nginx container image built from source, with a newer OpenSSL 4.0 stack
 
 ## Highlights
 
-- Built from source with OpenSSL 4.0.2
+- Built from source with OpenSSL 4.0.3
 - Enables ECH support via OpenSSL 4.0+
 - Includes LuaJIT support via the `lua-nginx-module`
 - Includes ModSecurity v3 integration via the `ModSecurity-nginx` connector
@@ -38,6 +38,7 @@ The main customization points are:
 2. LuaJIT integration
    - `lua-nginx-module` is included.
    - `lua-resty-core` and `lua-resty-lrucache` are installed into `/etc/nginx/lualib`.
+   - Additional LuaRocks packages may be installed via `LUAROCKS_PACKAGES` during startup.
 
 3. ModSecurity integration
    - ModSecurity is built and linked into nginx as a module.
@@ -49,8 +50,8 @@ The main customization points are:
 
 ## Included components
 
-- nginx 1.31.6
-- OpenSSL 4.0.2
+- nginx 1.31.7
+- OpenSSL 4.0.3
 - ModSecurity v3.0.17
 - LuaJIT
 - `ngx_devel_kit`
@@ -64,6 +65,7 @@ The main customization points are:
 - `NGINX_USER`: the `user` directive written into the generated `nginx.conf` (default: `nginx`). The named user must exist in the image or nginx will not be able to switch to it.
 - `LOAD_MODULES`: comma-separated list of absolute module paths to `load_module` at container startup (e.g. `/usr/lib/nginx/modules/ngx_http_foo.so,/usr/lib/nginx/modules/ngx_stream_bar.so`). The image contains the built modules under `/usr/lib/nginx/modules`.
 - `USE_STREAM`: set to `1` to append a `stream { include /etc/nginx/stream-conf.d/*.conf; }` block into the runtime `nginx.conf` (default: `0`).
+- `LUAROCKS_PACKAGES`: comma-separated list of LuaRocks packages to install on first launch, for example `lua-resty-http,luasocket`. The install runs once and is guarded by the container's initialization marker, so subsequent restarts do not reinstall packages unless the marker is removed. This is useful when you want to add extra Lua dependencies without rebuilding the image.
 
 ## Image layout
 
@@ -84,12 +86,14 @@ The image includes:
 - `docker-entrypoint.sh`
 - `15-local-resolvers.envsh`
 - `20-envsubst-on-templates.sh`
+- `25-luarocks-packages.sh`
 
 These follow the common nginx Docker pattern:
 
 - run scripts from `/docker-entrypoint.d` before startup
 - source `.envsh` variables when needed
 - substitute environment variables in templates for config files
+- install `LUAROCKS_PACKAGES` entries on first startup when the environment variable is set
 
 This is intended to be compatible with the common "official nginx container" style, but the actual service configuration is left to the end user.
 
@@ -142,6 +146,7 @@ server {
 - The image is designed for flexibility and experimentation rather than as a pre-wired demo site.
 - The Dockerfile keeps the build toolchain in the builder stage and copies only the runtime artifacts into the final stage.
 - `make install_sw` is used for OpenSSL because it is the correct minimal runtime install for the OpenSSL binary and library set.
+- `LUAROCKS_PACKAGES` is intentionally a startup-time convenience hook rather than a build-time dependency; the package list is installed once and then skipped by default.
 - The final image removes build-only headers and unused artifacts to reduce size.
 
 ## License
