@@ -20,6 +20,12 @@ fi
 if [ "$USE_STREAM" = "1" ]; then
     cat >> /etc/nginx/nginx.conf << EOF
 stream {
+    log_format proxy '$remote_addr [$time_local] '
+                     '$protocol $status $bytes_sent $bytes_received '
+                     '$session_time "$upstream_addr"';
+
+    access_log  /var/log/nginx/access.log  proxy;
+
     lua_package_path "/etc/nginx/lualib/?.lua;/usr/share/lua/5.1/?.lua;/usr/share/lua/5.1/?/init.lua";
 
     include /etc/nginx/stream-conf.d/*.conf;
